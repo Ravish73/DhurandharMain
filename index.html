@@ -13,18 +13,57 @@
 }
 
 body {
-    height: 100vh;
     background: black;
     font-family: "Courier New", monospace;
-    color: #7CFFD6; /* brighter than matrix */
+    color: #7CFFD6;
     overflow: hidden;
 }
 
-/* ---------- MATRIX CANVAS ---------- */
+/* ---------- LOADING SCREEN ---------- */
+#loader {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#loader h1 {
+    font-size: 2.2rem;
+    color: #00ff9c;
+    text-shadow: 0 0 15px #00ff9c;
+    animation: glitch 1s infinite;
+}
+
+#loader p {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.progress {
+    width: 300px;
+    height: 6px;
+    background: #111;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: #00ff9c;
+    box-shadow: 0 0 10px #00ff9c;
+}
+
+/* ---------- MATRIX ---------- */
 #matrix {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     z-index: 0;
 }
 
@@ -33,43 +72,45 @@ body {
     position: fixed;
     width: 100%;
     height: 4px;
-    background: rgba(0, 255, 0, 0.2);
+    background: rgba(0,255,0,0.2);
     animation: scan 4s linear infinite;
     z-index: 3;
 }
 
 @keyframes scan {
-    0% { top: 0; }
-    100% { top: 100%; }
+    from { top: 0; }
+    to { top: 100%; }
+}
+
+/* ---------- WRAPPER ---------- */
+.wrapper {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* ---------- CONTAINER ---------- */
 .container {
-    position: relative;
     z-index: 2;
     text-align: center;
     padding: 40px 30px;
     max-width: 800px;
-    background: rgba(0, 0, 0, 0.55); /* dark glass */
+    background: rgba(0,0,0,0.55);
     border-radius: 14px;
     backdrop-filter: blur(2px);
-    box-shadow: 0 0 40px rgba(0,255,160,0.1);
 }
 
 /* ---------- TITLE ---------- */
 .title {
     font-size: 4rem;
     letter-spacing: 6px;
-    margin-bottom: 20px;
 }
 
 /* ---------- GLITCH ---------- */
 .glitch {
-    position: relative;
     color: #00ffb3;
-    text-shadow:
-        2px 2px red,
-        -2px -2px cyan;
+    text-shadow: 2px 2px red, -2px -2px cyan;
     animation: glitch 1s infinite;
 }
 
@@ -82,11 +123,9 @@ body {
 /* ---------- TYPEWRITER ---------- */
 #typewriter {
     font-size: 1.2rem;
-    max-width: 650px;
-    margin: 20px auto 30px;
+    margin: 20px auto;
     min-height: 180px;
     white-space: pre-line;
-    line-height: 1.6;
     text-shadow: 0 0 8px rgba(0,255,180,0.6);
 }
 
@@ -96,134 +135,122 @@ button {
     border: 2px solid #00ff9c;
     color: #00ff9c;
     padding: 12px 30px;
-    font-size: 1rem;
     cursor: pointer;
-    letter-spacing: 1px;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #00ff9c;
-    color: #000;
 }
 
 /* ---------- FOOTER ---------- */
 .footer {
-    margin-top: 30px;
+    margin-top: 20px;
     font-size: 0.8rem;
     opacity: 0.7;
-}
-
-/* ---------- CENTER ---------- */
-.wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 600px) {
-    .title {
-        font-size: 2.6rem;
-    }
 }
 </style>
 </head>
 
 <body>
 
-<!-- MATRIX BACKGROUND -->
-<canvas id="matrix"></canvas>
+<!-- LOADING SCREEN -->
+<div id="loader">
+    <h1>SYSTEM OVERLOAD</h1>
+    <p>Injecting Payload • Bypassing Firewall • Accessing Core</p>
+    <div class="progress"><span id="bar"></span></div>
+</div>
 
+<!-- MATRIX -->
+<canvas id="matrix"></canvas>
 <div class="scanline"></div>
 
-<div class="wrapper">
+<!-- MAIN CONTENT -->
+<div class="wrapper" id="main">
     <div class="container">
         <h1 class="title glitch">DHURANDHAR</h1>
-
         <p id="typewriter"></p>
-
         <button onclick="playMusic()">▶ PLAY MISSION ANTHEM</button>
-
-        <div class="footer">
-            Spy In CyberSuccess | Patriot Mode ON
-        </div>
-
-        <!-- AUDIO -->
+        <div class="footer">Spy In CyberSuccess | Music Loading..</div>
         <audio id="song" src="dhurandhar.mp3"></audio>
     </div>
 </div>
 
 <script>
-/* ---------- MATRIX EFFECT (FADED) ---------- */
+/* ---------- LOADER ---------- */
+let load = 0;
+const bar = document.getElementById("bar");
+const loader = document.getElementById("loader");
+const main = document.getElementById("main");
+
+const loadingInterval = setInterval(() => {
+    load += Math.floor(Math.random() * 8);
+    if (load >= 100) {
+        load = 100;
+        clearInterval(loadingInterval);
+        loader.style.display = "none";
+        main.style.display = "flex";
+        startMatrix();
+        typeEffect();
+    }
+    bar.style.width = load + "%";
+}, 120);
+
+/* ---------- MATRIX (BOLD + DARK + LONG FADING LINES) ---------- */
 const canvas = document.getElementById("matrix");
 const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const chars = "アカサタナハマヤラワ0123456789DHURANDHAR";
+const size = 18;
+const cols = Math.floor(canvas.width / size);
+const drops = Array(cols).fill(1);
 
-const letters = "アカサタナハマヤラワ0123456789DHURANDHAR";
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-const drops = [];
+function startMatrix() {
+    setInterval(() => {
 
-for (let i = 0; i < columns; i++) {
-    drops[i] = Math.random() * canvas.height;
+        /* slower fade = longer trails */
+        ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = "bold " + size + "px monospace";
+        ctx.fillStyle = "rgba(0, 170, 80, 0.9)";
+
+        /* vertical trail glow */
+        ctx.shadowColor = "rgba(0, 255, 120, 0.35)";
+        ctx.shadowBlur = 10;
+
+        drops.forEach((y, i) => {
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(char, i * size, y * size);
+
+            if (y * size > canvas.height && Math.random() > 0.97) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        });
+
+        ctx.shadowBlur = 0;
+    }, 50);
 }
-
-function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.12)"; // stronger fade
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "rgba(0, 255, 120, 0.35)"; // darker rain
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-        const char = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) {
-            drops[i] = 0;
-        }
-        drops[i]++;
-    }
-}
-
-setInterval(drawMatrix, 50);
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
 
 /* ---------- TYPEWRITER ---------- */
 const text = `
-“Agar tum logon ke patakhe khatam ho gaye ho 
-toh main dhamaka shuru karu...?”
+"Agar tum logon ke patakhe khatam ho gaye ho,
+toh main dhamaka shuru karu."
 
-🕵️ .
-🔥 “Rehman Dakait ki di hui maut, 
-badi kasainuma hoti hai.” – Akshaye Khanna
+"Ghayal Hoon Isliye Ghatak Hoon"
 
-
-— Ghayal hoon isliye ghatak hoon —
+— DHURANDHAR MODE ACTIVATED —
+ACCESS GRANTED ██████████ 100%
 `;
 
-let index = 0;
-const speed = 40;
-
-function typeEffect() {
-    if (index < text.length) {
-        document.getElementById("typewriter").innerHTML += text.charAt(index);
-        index++;
-        setTimeout(typeEffect, speed);
+let i = 0;
+function typeEffect(){
+    if(i < text.length){
+        document.getElementById("typewriter").innerHTML += text[i++];
+        setTimeout(typeEffect,40);
     }
 }
-typeEffect();
 
 /* ---------- MUSIC ---------- */
-function playMusic() {
+function playMusic(){
     document.getElementById("song").play();
 }
 </script>
