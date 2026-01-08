@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dhurandhar | Cyber Spy Patriot</title>
+
+<style>
+/* ---------- GLOBAL ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    background: black;
+    font-family: "Courier New", monospace;
+    color: #7CFFD6; /* brighter than matrix */
+    overflow: hidden;
+}
+
+/* ---------- MATRIX CANVAS ---------- */
+#matrix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* ---------- SCANLINE ---------- */
+.scanline {
+    position: fixed;
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 255, 0, 0.2);
+    animation: scan 4s linear infinite;
+    z-index: 3;
+}
+
+@keyframes scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+/* ---------- CONTAINER ---------- */
+.container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 40px 30px;
+    max-width: 800px;
+    background: rgba(0, 0, 0, 0.55); /* dark glass */
+    border-radius: 14px;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 0 40px rgba(0,255,160,0.1);
+}
+
+/* ---------- TITLE ---------- */
+.title {
+    font-size: 4rem;
+    letter-spacing: 6px;
+    margin-bottom: 20px;
+}
+
+/* ---------- GLITCH ---------- */
+.glitch {
+    position: relative;
+    color: #00ffb3;
+    text-shadow:
+        2px 2px red,
+        -2px -2px cyan;
+    animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+    0% { text-shadow: 2px 2px red; }
+    50% { text-shadow: -2px -2px cyan; }
+    100% { text-shadow: 2px 2px red; }
+}
+
+/* ---------- TYPEWRITER ---------- */
+#typewriter {
+    font-size: 1.2rem;
+    max-width: 650px;
+    margin: 20px auto 30px;
+    min-height: 180px;
+    white-space: pre-line;
+    line-height: 1.6;
+    text-shadow: 0 0 8px rgba(0,255,180,0.6);
+}
+
+/* ---------- BUTTON ---------- */
+button {
+    background: transparent;
+    border: 2px solid #00ff9c;
+    color: #00ff9c;
+    padding: 12px 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #00ff9c;
+    color: #000;
+}
+
+/* ---------- FOOTER ---------- */
+.footer {
+    margin-top: 30px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* ---------- CENTER ---------- */
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 600px) {
+    .title {
+        font-size: 2.6rem;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- MATRIX BACKGROUND -->
+<canvas id="matrix"></canvas>
+
+<div class="scanline"></div>
+
+<div class="wrapper">
+    <div class="container">
+        <h1 class="title glitch">DHURANDHAR</h1>
+
+        <p id="typewriter"></p>
+
+        <button onclick="playMusic()">▶ PLAY MISSION ANTHEM</button>
+
+        <div class="footer">
+            Spy In CyberSuccess | Patriot Mode ON
+        </div>
+
+        <!-- AUDIO -->
+        <audio id="song" src="dhurandhar.mp3"></audio>
+    </div>
+</div>
+
+<script>
+/* ---------- MATRIX EFFECT (FADED) ---------- */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const letters = "アカサタナハマヤラワ0123456789DHURANDHAR";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = [];
+
+for (let i = 0; i < columns; i++) {
+    drops[i] = Math.random() * canvas.height;
+}
+
+function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.12)"; // stronger fade
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(0, 255, 120, 0.35)"; // darker rain
+    ctx.font = fontSize + "px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+        const char = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.98) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+
+setInterval(drawMatrix, 50);
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+/* ---------- TYPEWRITER ---------- */
+const text = `
+“Agar tum logon ke patakhe khatam ho gaye ho 
+toh main dhamaka shuru karu...?”
+
+🕵️ .
+🔥 “Rehman Dakait ki di hui maut, 
+badi kasainuma hoti hai.” – Akshaye Khanna
+
+
+— Ghayal hoon isliye ghatak hoon —
+`;
+
+let index = 0;
+const speed = 40;
+
+function typeEffect() {
+    if (index < text.length) {
+        document.getElementById("typewriter").innerHTML += text.charAt(index);
+        index++;
+        setTimeout(typeEffect, speed);
+    }
+}
+typeEffect();
+
+/* ---------- MUSIC ---------- */
+function playMusic() {
+    document.getElementById("song").play();
+}
+</script>
+
+</body>
+</html>
